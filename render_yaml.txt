@@ -2,11 +2,10 @@ services:
   - type: web
     name: crypto-alert-bot
     env: python
+    runtime: python-3.11.7
     buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: python main.py
     plan: free
     envVars:
-      - key: PYTHON_VERSION
-        value: 3.11.7
       - key: BOT_TOKEN
         sync: false
