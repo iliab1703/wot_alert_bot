@@ -2,9 +2,9 @@ services:
   - type: web
     name: crypto-alert-bot
     env: python
-    buildCommand: pip install -r requirements.txt
+    buildCommand: pip install --upgrade pip && pip install -r requirements.txt
     startCommand: python main.py
     plan: free
     envVars:
       - key: PYTHON_VERSION
-        value: 3.11.7
+        value: 3.10.13
