@@ -33,6 +33,7 @@ class CryptoLongEntryBot:
         
     async def start_bot(self):
         """Initialize and start the Telegram bot"""
+        # Create application
         self.application = Application.builder().token(self.bot_token).build()
         
         # Add handlers
@@ -43,25 +44,22 @@ class CryptoLongEntryBot:
         self.application.add_handler(CommandHandler("remove", self.remove_level_command))
         self.application.add_handler(CallbackQueryHandler(self.button_callback))
         
+        # Initialize the application
+        await self.application.initialize()
+        
+        # Start the application
+        await self.application.start()
+        
         # Start monitoring task
         asyncio.create_task(self.price_monitoring_loop())
         
-        # Start the bot with proper initialization
-        await self.application.initialize()
-        await self.application.start()
-        
-        # Start polling
-        await self.application.updater.start_polling(
-            poll_interval=1.0,
-            timeout=10,
-            bootstrap_retries=3,
-            read_timeout=30,
-            write_timeout=30,
-            connect_timeout=30,
-            pool_timeout=30
-        )
-        
         logger.info("Long Entry Alert Bot started successfully!")
+        
+        # Start polling with simple approach
+        await self.application.updater.start_polling(drop_pending_updates=True)
+        
+        # Keep running
+        await self.application.updater.idle()
         
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /start command"""
@@ -400,18 +398,6 @@ async def main():
     try:
         logger.info("🚀 Starting Crypto Long Entry Alert Bot...")
         await bot.start_bot()
-        
-        # Keep the application running
-        try:
-            await asyncio.sleep(float('inf'))
-        except KeyboardInterrupt:
-            logger.info("👋 Bot stopped by user")
-        finally:
-            # Graceful shutdown
-            if bot.application:
-                await bot.application.updater.stop()
-                await bot.application.stop()
-                await bot.application.shutdown()
             
     except Exception as e:
         logger.error(f"Bot error: {e}")
