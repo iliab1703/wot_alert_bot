@@ -46,10 +46,20 @@ class CryptoLongEntryBot:
         # Start monitoring task
         asyncio.create_task(self.price_monitoring_loop())
         
-        # Start the bot
+        # Start the bot with proper initialization
         await self.application.initialize()
         await self.application.start()
-        await self.application.updater.start_polling()
+        
+        # Start polling
+        await self.application.updater.start_polling(
+            poll_interval=1.0,
+            timeout=10,
+            bootstrap_retries=3,
+            read_timeout=30,
+            write_timeout=30,
+            connect_timeout=30,
+            pool_timeout=30
+        )
         
         logger.info("Long Entry Alert Bot started successfully!")
         
@@ -391,14 +401,21 @@ async def main():
         logger.info("🚀 Starting Crypto Long Entry Alert Bot...")
         await bot.start_bot()
         
-        # Keep the bot running
-        while True:
-            await asyncio.sleep(1)
+        # Keep the application running
+        try:
+            await asyncio.sleep(float('inf'))
+        except KeyboardInterrupt:
+            logger.info("👋 Bot stopped by user")
+        finally:
+            # Graceful shutdown
+            if bot.application:
+                await bot.application.updater.stop()
+                await bot.application.stop()
+                await bot.application.shutdown()
             
-    except KeyboardInterrupt:
-        logger.info("👋 Bot stopped by user")
     except Exception as e:
         logger.error(f"Bot error: {e}")
+        raise
 
 if __name__ == "__main__":
     asyncio.run(main())
