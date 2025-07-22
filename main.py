@@ -33,8 +33,12 @@ class CryptoLongEntryBot:
         
     async def start_bot(self):
         """Initialize and start the Telegram bot"""
-        # Create application
-        self.application = Application.builder().token(self.bot_token).build()
+        # Create application with simplified approach
+        self.application = (
+            Application.builder()
+            .token(self.bot_token)
+            .build()
+        )
         
         # Add handlers
         self.application.add_handler(CommandHandler("start", self.start_command))
@@ -44,22 +48,13 @@ class CryptoLongEntryBot:
         self.application.add_handler(CommandHandler("remove", self.remove_level_command))
         self.application.add_handler(CallbackQueryHandler(self.button_callback))
         
-        # Initialize the application
-        await self.application.initialize()
-        
-        # Start the application
-        await self.application.start()
-        
         # Start monitoring task
         asyncio.create_task(self.price_monitoring_loop())
         
         logger.info("Long Entry Alert Bot started successfully!")
         
-        # Start polling with simple approach
-        await self.application.updater.start_polling(drop_pending_updates=True)
-        
-        # Keep running
-        await self.application.updater.idle()
+        # Run the bot with run_polling (newer approach)
+        await self.application.run_polling(drop_pending_updates=True)
         
     async def start_command(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         """Handle /start command"""
