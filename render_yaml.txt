@@ -7,4 +7,6 @@ services:
     plan: free
     envVars:
       - key: PYTHON_VERSION
-        value: 3.10.13
+        value: 3.11.7
+      - key: BOT_TOKEN
+        sync: false
